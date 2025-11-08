@@ -4,9 +4,6 @@ namespace Omnipay\Mpesa;
 
 use Omnipay\Common\AbstractGateway;
 
-/**
- * Mpesa Gateway api
- */
 class Gateway extends AbstractGateway
 {
     public function getName()
@@ -16,26 +13,39 @@ class Gateway extends AbstractGateway
 
     public function getDefaultParameters()
     {
-        return array(
-            'shortcode' => '',
+        return [
+            'transaction_type' => '', //CustomerPayBillOnline//CustomerBuyGoodsOnline
             'consumer_key' => '',
             'consumer_secret' => '',
             'token' => '',
+            'storenumber' => '',
+            'pt_number' => '',
+            'passkey' => '',
             'testMode' => false,
-        );
-    }
-    
-    public function getShortCode()
-    {
-        return $this->getParameter('shortcode');
+        ];
     }
 
-    public function setShortCode($value)
+    public function getTestMode()
     {
-        return $this->setParameter('shortcode', $value);
+        return $this->getParameter('testMode');
     }
 
-    public function getConsumerKey()
+    public function setTestMode($value)
+    {
+        return $this->setParameter('testMode', $value);
+    }
+
+    public function getTransactionType()
+    {
+        return $this->getParameter('transaction_type');
+    }
+
+    public function setTransactionType($value)
+    {
+        return $this->setParameter('transaction_type', $value);
+    }
+
+    public function getConsumerKey(): string
     {
         return $this->getParameter('consumer_key');
     }
@@ -45,7 +55,7 @@ class Gateway extends AbstractGateway
         return $this->setParameter('consumer_key', $value);
     }
 
-    public function getConsumerSecret()
+    public function getConsumerSecret(): string
     {
         return $this->getParameter('consumer_secret');
     }
@@ -54,18 +64,38 @@ class Gateway extends AbstractGateway
     {
         return $this->setParameter('consumer_secret', $value);
     }
-    
+
+    public function getStoreNumber()
+    {
+        return $this->getParameter('storenumber');
+    }
+
+    public function setStoreNumber($value)
+    {
+        return $this->setParameter('storenumber', $value);
+    }
+
+    public function getPTNumber()
+    {
+        return $this->getParameter('pt_number');
+    }
+
+    public function setPTNumber($value)
+    {
+        return $this->setParameter('pt_number', $value);
+    }
+
     public function getPassKey()
     {
-        return $this->getParameter('pass_key');
+        return $this->getParameter('passkey');
     }
 
     public function setPassKey($value)
     {
-        return $this->setParameter('pass_key', $value);
+        return $this->setParameter('passkey', $value);
     }
 
-     /**
+    /**
      * Get OAuth 2.0 access token.
      *
      * @param bool $createIfNeeded [optional] - If there is not an active token present, should we create one?
@@ -83,7 +113,6 @@ class Gateway extends AbstractGateway
                 }
             }
         }
-
         return $this->getParameter('token');
     }
 
@@ -137,28 +166,13 @@ class Gateway extends AbstractGateway
     public function hasToken()
     {
         $token = $this->getParameter('token');
-
         $expires = $this->getTokenExpires();
         if (!empty($expires) && !is_numeric($expires)) {
             $expires = strtotime($expires);
         }
-
         return !empty($token) && time() < $expires;
     }
 
-    /**
-     * Create Request
-     *
-     * This overrides the parent createRequest function ensuring that the OAuth
-     * 2.0 access token is passed along with the request data -- unless the
-     * request is a MpesaTokenRequest in which case no token is needed.  If no
-     * token is available then a new one is created (e.g. if there has been no
-     * token request or the current token has expired).
-     *
-     * @param string $class
-     * @param array $parameters
-     * @return \Omnipay\PayPal\Message\AbstractRestRequest
-     */
     public function createRequest($class, array $parameters = array())
     {
         if (!$this->hasToken() && $class != '\Omnipay\Mpesa\Message\MpesaTokenRequest') {
@@ -170,19 +184,19 @@ class Gateway extends AbstractGateway
         return parent::createRequest($class, $parameters);
     }
 
-    /**
-     * Create a purchase request.
-     *
-     * PayPal provides various payment related operations using the /payment
-     * resource and related sub-resources. 
-     *
-     * @link https://developer.safaricom.co.ke/get-started
-     * @param array $parameters
-     * @return \Omnipay\Mpesa\Message\MpesaPurchaseRequest
-     */
-    public function purchase(array $parameters = array())
+
+    public function payment(array $parameters = [])
     {
-        return $this->createRequest('\Omnipay\Mpesa\Message\MpesaPurchaseRequest', $parameters);
+        return $this->createRequest('\Omnipay\Mpesa\Message\MpesaPaymentRequest', $parameters);
     }
 
+    public function confirmPayment(array $parameters = [])
+    {
+        return $this->createRequest('\Omnipay\Mpesa\Message\MpesaConfirmPaymentRequest', $parameters);
+    }
+
+    public function registerUrl(array $parameters = [])
+    {
+        return $this->createRequest('\Omnipay\Mpesa\Message\MpesaC2BRegisterURLRequest', $parameters);
+    }
 }
