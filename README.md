@@ -11,6 +11,7 @@ It is a C2B transaction, but with the initiator being the organization instead o
 Since the organization has the option of presetting all required variables in the request before sending the request,
 this API has no Validation-Confirmation process like the previous C2B API.
 
+go to version updated v https://github.com/wasksofts-technology/omnipay-mpesa
 ## TL;DR
 Just want to see some code? 
 
